@@ -15,3 +15,4 @@ CREATE TABLE articulos_comprados (
     -- ON DELETE CASCADE -- Opcional: Para eliminar registros de compra si se elimina un artículo
     -- ON UPDATE CASCADE -- Opcional: Para actualizar registros de compra si cambia el ID de un artículo
 );
+

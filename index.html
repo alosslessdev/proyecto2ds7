@@ -32,35 +32,45 @@
 
       <div class="modal-body">
         <form action="procesar_compra.php" method="POST">
-          <div class="mb-3">
-            <label for="nombre" class="form-label">Nombre completo</label>
-            <input type="text" class="form-control" id="nombre" placeholder="Tu nombre">
-          </div>
+          <form action="procesar_compra.php" method="POST">
+                    <div class="mb-3">
+                        <label for="nombre" class="form-label">Nombre completo</label>
+                        <input type="text" class="form-control" id="nombre" name="nombre_completo" placeholder="Tu nombre" required>
+                    </div>
 
-          <div class="mb-3">
-            <label for="tarjeta" class="form-label">Número de tarjeta</label>
-            <input type="text" class="form-control" id="tarjeta" placeholder="XXXX XXXX XXXX XXXX">
-          </div>
+                    <div class="mb-3">
+                        <label for="tarjeta" class="form-label">Número de tarjeta</label>
+                        <input type="text" class="form-control" id="tarjeta" name="numero_tarjeta" placeholder="XXXX XXXX XXXX XXXX" required pattern="^(\d{4}\s?){3}\d{4}$" title="Ingrese 16 dígitos (ej. 1234 5678 9012 3456)">
+                    </div>
 
-          <div class="row">
-            <div class="col mb-3">
-              <label for="vencimiento" class="form-label">Vencimiento</label>
-              <input type="text" class="form-control" id="vencimiento" placeholder="MM/AA">
-            </div>
-            <div class="col mb-3">
-              <label for="cvv" class="form-label">CVV</label>
-              <input type="text" class="form-control" id="cvv" placeholder="XXX">
-            </div>
-          </div>
+                    <div class="row">
+                        <div class="col mb-3">
+                            <label for="vencimiento" class="form-label">Vencimiento</label>
+                            <input type="text" class="form-control" id="vencimiento" name="vencimiento" placeholder="MM/AA" required pattern="^(0[1-9]|1[0-2])\/?([0-9]{2})$" title="Formato MM/AA (ej. 12/25)">
+                        </div>
+                        <div class="col mb-3">
+                            <label for="cvv" class="form-label">CVV</label>
+                            <input type="text" class="form-control" id="cvv" name="cvv" placeholder="XXX" required pattern="^\d{3,4}$" title="Ingrese 3 o 4 dígitos">
+                        </div>
+                    </div>
 
-          <div class="mb-3">
-            <label class="form-label">Método de pago</label>
-            <div class="d-flex align-items-center gap-3">
-              <div style="width: 50px; height: 30px; background-color: #e9ecef; display: flex; justify-content: center; align-items: center;">Visa</div>
-              <div style="width: 50px; height: 30px; background-color: #e9ecef; display: flex; justify-content: center; align-items: center;">Master</div>
-              <div style="width: 50px; height: 30px; background-color: #e9ecef; display: flex; justify-content: center; align-items: center;">PayPal</div>
-            </div>
-          </div>
+                    <div class="mb-3">
+                        <label class="form-label">Método de pago</label>
+                        <div class="d-flex align-items-center gap-3">
+                            <div style="width: 50px; height: 30px; background-color: #e9ecef; display: flex; justify-content: center; align-items: center;">Visa</div>
+                            <div style="width: 50px; height: 30px; background-color: #e9ecef; display: flex; justify-content: center; align-items: center;">Master</div>
+                            <div style="width: 50px; height: 30px; background-color: #e9ecef; display: flex; justify-content: center; align-items: center;">PayPal</div>
+                        </div>
+                        <input type="hidden" id="metodoPagoSeleccionado" name="metodo_pago" value="Tarjeta">
+                    </div>
+
+                    <input type="hidden" id="productoComprado" name="producto_comprado">
+                    <input type="hidden" id="precioProducto" name="precio">
+
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                        <button type="submit" class="btn btn-dark">Pagar</button>
+                    </div>
 
         </form>
       </div>
