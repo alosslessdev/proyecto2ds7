@@ -32,9 +32,9 @@ $article_content = ""; // Variable para almacenar el contenido a mostrar
 // Es más seguro usar sesiones para manejar el estado de login. Si aún no las usas:
 session_start(); // Inicia la sesión al principio de tu script
 
-if (isset($_SESSION['logged_in']) && $_SESSION['logged_in'] === true && isset($_SESSION['user_id'])) {
+if (isset($_COOKIE['logged_in']) && $_COOKIE['logged_in'] === true && isset($_COOKIE['user_id'])) {
     $is_logged_in = true;
-    $user_id = (int)$_SESSION['user_id'];
+    $user_id = (int)$_COOKIE['user_id'];
 }
 // Si estás usando cookies como en tu ejemplo original y no sesiones:
 // if (isset($_COOKIE['logged_in']) && $_COOKIE['logged_in'] === 'true' && isset($_COOKIE['user_id'])) {
