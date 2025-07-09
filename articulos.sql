@@ -7,6 +7,9 @@
 -- Aquí almacenaremos los detalles de los productos que se venden en tu "Tienda Exclusiva".
 -- He añadido un campo 'nombre' que es crucial para poder mapear los productos del HTML.
 -- También he añadido 'precio' para que puedas registrar el precio directamente en la base de datos si es necesario.
+CREATE DATABASE IF NOT EXISTS articulos;
+USE articulos;
+
 CREATE TABLE IF NOT EXISTS articulos (
     id INT PRIMARY KEY AUTO_INCREMENT,   -- Identificador único para cada artículo
     nombre VARCHAR(255) NOT NULL UNIQUE, -- Nombre del artículo (ej. "Camisa 'Ghost of Yōtei'") - UNIQUE para evitar duplicados
