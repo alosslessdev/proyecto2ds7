@@ -1,3 +1,67 @@
+<?php
+// articulo.php
+
+// Configuración de la base de datos
+$servername = "localhost";
+$username = "tu_usuario_db"; // ¡Cambia esto!
+$password = "tu_password_db"; // ¡Cambia esto!
+$dbname = "tu_nombre_db"; // ¡Cambia esto!
+
+$conn = new mysqli($servername, $username, $password, $dbname);
+
+if ($conn->connect_error) {
+    die("Conexión fallida: " . $conn->connect_error);
+}
+
+// ID del artículo que se está viendo en esta página
+// Puedes hacer que este ID sea dinámico (ej. de la URL ?id=X)
+// Por ahora, lo fijamos al ID del artículo que insertamos de prueba
+$current_article_id = 1; // Asumiendo que 'Entrevista exclusiva con Yuji Naka' tiene ID 1
+
+$is_logged_in = false;
+$has_purchased = false;
+$user_id = null;
+$article_content = ""; // Variable para almacenar el contenido a mostrar
+
+// 1. Verificar si el usuario está logueado (usando cookies)
+if (isset($_COOKIE['logged_in']) && $_COOKIE['logged_in'] === 'true' && isset($_COOKIE['user_id'])) {
+    $is_logged_in = true;
+    $user_id = (int)$_COOKIE['user_id']; // Convertir a entero para seguridad
+}
+
+// 2. Si el usuario está logueado, verificar si ha comprado el artículo
+if ($is_logged_in) {
+    $stmt_check_purchase = $conn->prepare("SELECT COUNT(*) FROM articulos_comprados WHERE usuario_id = ? AND articulo_id = ?");
+    $stmt_check_purchase->bind_param("ii", $user_id, $current_article_id);
+    $stmt_check_purchase->execute();
+    $stmt_check_purchase->bind_result($purchase_count);
+    $stmt_check_purchase->fetch();
+    $stmt_check_purchase->close();
+
+    if ($purchase_count > 0) {
+        $has_purchased = true;
+    }
+}
+
+// 3. Obtener el contenido del artículo de la base de datos
+$stmt_get_content = $conn->prepare("SELECT contenido_gratis, contenido_premium FROM articulos WHERE id = ?");
+$stmt_get_content->bind_param("i", $current_article_id);
+$stmt_get_content->execute();
+$stmt_get_content->bind_result($contenido_gratis, $contenido_premium);
+$stmt_get_content->fetch();
+$stmt_get_content->close();
+
+// Decidir qué contenido mostrar
+if ($has_purchased) {
+    $article_content = $contenido_premium;
+} else {
+    $article_content = $contenido_gratis;
+}
+
+$conn->close();
+?>
+
+
 <!DOCTYPE html>
 <html lang="en">
     <head>
