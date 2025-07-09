@@ -3,9 +3,9 @@
 
 // Configuración de la base de datos
 $servername = "localhost";
-$username = "tu_usuario_db"; // ¡Cambia esto!
-$password = "tu_password_db"; // ¡Cambia esto!
-$dbname = "tu_nombre_db"; // ¡Cambia esto!
+$username = "root"; // ¡Cambia esto por tu usuario de base de datos!
+$password = ""; // ¡Cambia esto por tu contraseña de base de datos!
+$dbname = "articulos"; // ¡Cambia esto por el nombre de tu base de datos!
 
 $conn = new mysqli($servername, $username, $password, $dbname);
 
@@ -16,18 +16,31 @@ if ($conn->connect_error) {
 // ID del artículo que se está viendo en esta página
 // Puedes hacer que este ID sea dinámico (ej. de la URL ?id=X)
 // Por ahora, lo fijamos al ID del artículo que insertamos de prueba
+// Para hacerlo dinámico desde la URL, usarías algo como:
+// $current_article_id = isset($_GET['id']) ? (int)$_GET['id'] : 1;
 $current_article_id = 1; // Asumiendo que 'Entrevista exclusiva con Yuji Naka' tiene ID 1
 
 $is_logged_in = false;
 $has_purchased = false;
 $user_id = null;
+$article_title = "Cargando..."; // Para el título del artículo
+$article_description = "Cargando..."; // Para la descripción del artículo
+$article_image = ""; // Para la imagen del artículo
 $article_content = ""; // Variable para almacenar el contenido a mostrar
 
-// 1. Verificar si el usuario está logueado (usando cookies)
-if (isset($_COOKIE['logged_in']) && $_COOKIE['logged_in'] === 'true' && isset($_COOKIE['user_id'])) {
+// 1. Verificar si el usuario está logueado (usando cookies o sesiones)
+// Es más seguro usar sesiones para manejar el estado de login. Si aún no las usas:
+session_start(); // Inicia la sesión al principio de tu script
+
+if (isset($_SESSION['logged_in']) && $_SESSION['logged_in'] === true && isset($_SESSION['user_id'])) {
     $is_logged_in = true;
-    $user_id = (int)$_COOKIE['user_id']; // Convertir a entero para seguridad
+    $user_id = (int)$_SESSION['user_id'];
 }
+// Si estás usando cookies como en tu ejemplo original y no sesiones:
+// if (isset($_COOKIE['logged_in']) && $_COOKIE['logged_in'] === 'true' && isset($_COOKIE['user_id'])) {
+//     $is_logged_in = true;
+//     $user_id = (int)$_COOKIE['user_id']; // Convertir a entero para seguridad
+// }
 
 // 2. Si el usuario está logueado, verificar si ha comprado el artículo
 if ($is_logged_in) {
@@ -43,48 +56,47 @@ if ($is_logged_in) {
     }
 }
 
-// 3. Obtener el contenido del artículo de la base de datos
-$stmt_get_content = $conn->prepare("SELECT contenido_gratis, contenido_premium FROM articulos WHERE id = ?");
-$stmt_get_content->bind_param("i", $current_article_id);
-$stmt_get_content->execute();
-$stmt_get_content->bind_result($contenido_gratis, $contenido_premium);
-$stmt_get_content->fetch();
-$stmt_get_content->close();
+// 3. Obtener los detalles del artículo de la base de datos
+$stmt_get_article = $conn->prepare("SELECT titulo, descripcion, imagen, contenido_gratis, contenido_premium FROM articulos WHERE id = ?");
+$stmt_get_article->bind_param("i", $current_article_id);
+$stmt_get_article->execute();
+$stmt_get_article->bind_result($db_title, $db_description, $db_image, $contenido_gratis, $contenido_premium);
+$stmt_get_article->fetch();
+$stmt_get_article->close();
+
+$article_title = $db_title;
+$article_description = $db_description;
+$article_image = $db_image;
 
 // Decidir qué contenido mostrar
-if ($has_purchased) {
-    $article_content = $contenido_premium;
-} else {
+if ($has_purchased || !$is_logged_in) { // Mostrar contenido gratis si no ha comprado o no está logueado
     $article_content = $contenido_gratis;
+} 
+if ($has_purchased && $is_logged_in) { // Mostrar premium si ha comprado Y está logueado
+    $article_content = $contenido_premium;
 }
+
 
 $conn->close();
 ?>
 
-
 <!DOCTYPE html>
-<html lang="en">
+<html lang="es">
     <head>
         <meta charset="utf-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=yes" />
         <meta name="description" content="" />
         <meta name="author" content="" />
-        <title>Creative - Start Bootstrap Theme</title>
-        <!-- Favicon-->
+        <title><?php echo htmlspecialchars($article_title); ?> - Gaming Noticia</title>
         <link rel="icon" type="image/x-icon" href="assets/favicon.ico" />
-        <!-- Bootstrap Icons-->
         <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.5.0/font/bootstrap-icons.css" rel="stylesheet" />
-        <!-- Google fonts-->
         <link href="https://fonts.googleapis.com/css?family=Merriweather+Sans:400,700" rel="stylesheet" />
         <link href="https://fonts.googleapis.com/css?family=Merriweather:400,300,300italic,400italic,700,700italic" rel="stylesheet" type="text/css" />
-        <!-- SimpleLightbox plugin CSS-->
         <link href="https://cdnjs.cloudflare.com/ajax/libs/SimpleLightbox/2.1.0/simpleLightbox.min.css" rel="stylesheet" />
-        <!-- Core theme CSS (includes Bootstrap)-->
         <link href="css/styles.css" rel="stylesheet" />
     </head>
     <body id="page-top">
-        <!-- Navigation-->
-       <nav class="navbar navbar-expand-lg navbar-light fixed-top py-3" id="mainNav">
+        <nav class="navbar navbar-expand-lg navbar-light fixed-top py-3" id="mainNav">
         <div class="container px-4 px-lg-5">
             <a class="navbar-brand" href="index.html#page-top">
                 <img src="assets/favicon.ico" style="height: 30px; margin-right: 10px;" />
@@ -98,72 +110,67 @@ $conn->close();
                     <li class="nav-item"><a class="nav-link" href="index.html#noticiasrelevantes">Noticias</a></li>
                     <li class="nav-item"><a class="nav-link" href="index.html#portfolio">Reviews</a></li>
                     <li class="nav-item"><a class="nav-link" href="index.html#juego">Juegos</a></li>
-                <li class="nav-item"><a class="nav-link" href="login.html">Login</a></li>
+                    <li class="nav-item"><a class="nav-link" href="login.html">Login</a></li>
                 </ul>
             </div>
         </div>
     </nav>
 
-        <!-- Masthead-->
-        <header class="masthead", style="background: linear-gradient(to bottom, rgba(92, 77, 66, 0.8) 0%, rgba(92, 77, 66, 0.8) 100%), url(assets/img/portfolio/thumbnails/MV5BNWNhZDUwZjgtYTg0YS00MzQ2LWFkYzItMzI0ZDEyZWE5MTk2XkEyXkFqcGc@._V1_.jpg); 
+        <header class="masthead" style="background: linear-gradient(to bottom, rgba(92, 77, 66, 0.8) 0%, rgba(92, 77, 66, 0.8) 100%), url(<?php echo htmlspecialchars($article_image); ?>); 
         background-repeat: no-repeat; background-size: cover;">               
-            
-
             <div class="row gx-4 gx-lg-5 h-100 align-items-center text-center">
                 <div class="col-lg-6">
-                    <h1 class="text-white font-weight-bold">Entrevista exclusiva con Yuji Naka</h1>
+                    <h1 class="text-white font-weight-bold"><?php echo htmlspecialchars($article_title); ?></h1>
                     <hr class="divider" />
-                    <p class="text-white-75 mb-5">Naka es un experimentado desarrollador de videojuegos japonés detras de la franquicia de Sonic The HedgeHog.</p>
-
-                       
+                    <p class="text-white-75 mb-5"><?php echo htmlspecialchars($article_description); ?></p>
                 </div>
-
-                    <div class="col-lg-6" style="padding-left: 5%;">
-                            <img src="assets/img/portfolio/thumbnails/MV5BNWNhZDUwZjgtYTg0YS00MzQ2LWFkYzItMzI0ZDEyZWE5MTk2XkEyXkFqcGc@._V1_.jpg" width="100%" class="img-fluid">
-                    </div>
-
-                   
-
+                <div class="col-lg-6" style="padding-left: 5%;">
+                    <img src="<?php echo htmlspecialchars($article_image); ?>" width="100%" class="img-fluid" alt="Imagen del artículo">
+                </div>
             </div>
-
-                
-
         </header>
-        <!-- About-->
-        
-        <!-- Services-->
-        <section class="page-section" id="services">
+
+        <section class="page-section" id="article-content">
             <div class="container px-4 px-lg-5">
-                <h2 class="text-center mt-0">
+                <?php if ($has_purchased || $is_logged_in === false): // Mostrar contenido premium si se ha comprado, o el contenido gratuito si no está logueado ?>
+                    <div class="row gx-4 gx-lg-5 justify-content-center">
+                        <div class="col-lg-8 text-center">
+                            <p class="text-dark-75 mb-4 text-start">
+                                <?php echo nl2br(htmlspecialchars($article_content)); ?>
+                            </p>
+                        </div>
+                    </div>
+                <?php else: // Si no ha comprado y está logueado (para comprar el premium) ?>
+                    <h2 class="text-center mt-0">
+                        Este artículo es contenido premium. Para acceder a él, puedes:
+                        <br><br>
+                        1. **Adquirir una suscripción:** Esto te dará acceso ilimitado a todo nuestro contenido premium.
+                        <br>
+                        2. **Comprar este artículo:** Paga $2 una sola vez y accede a este artículo cuando quieras.
+                        <br><br>
+                        <a class="btn btn-primary btn-xl" href="compra_suscripcion.html">Adquirir Suscripción</a>
+                        <a class="btn btn-info btn-xl" href="comprar_articulo.php?id=<?php echo $current_article_id; ?>">Comprar este Artículo ($2)</a>
+                    </h2>
+                    <hr class="divider" />
+                <?php endif; ?>
 
-Este articulo se puede acceder con una suscripción,
-O puedes comprar el artículo y accederlo cuando quieras, pagando 2 dólares una sola vez.<br>
-<brñ>
- Entra ahora para acceder al articulo.<br>
-<br>
-<a class="btn btn-primary btn-xl" href="login.html">Entrar</a>
-
-</h2>
-
-                <hr class="divider" />
-                
+                <?php if (!$is_logged_in): // Mostrar el mensaje para iniciar sesión solo si no está logueado ?>
+                    <h2 class="text-center mt-0">
+                        Entra ahora para acceder al artículo o comprarlo.
+                        <br><br>
+                        <a class="btn btn-primary btn-xl" href="login.html">Entrar</a>
+                    </h2>
+                    <hr class="divider" />
+                <?php endif; ?>
             </div>
         </section>
 
-        <!-- Footer-->
         <footer class="bg-light py-5">
             <div class="container px-4 px-lg-5"><div class="small text-center text-muted">Copyright &copy; 2023 - Gaming Noticia</div></div>
         </footer>
-        <!-- Bootstrap core JS-->
         <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.bundle.min.js"></script>
-        <!-- SimpleLightbox plugin JS-->
         <script src="https://cdnjs.cloudflare.com/ajax/libs/SimpleLightbox/2.1.0/simpleLightbox.min.js"></script>
-        <!-- Core theme JS-->
         <script src="js/scripts.js"></script>
-        <!-- * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *-->
-        <!-- * *                               SB Forms JS                               * *-->
-        <!-- * * Activate your form at https://startbootstrap.com/solution/contact-forms * *-->
-        <!-- * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *-->
         <script src="https://cdn.startbootstrap.com/sb-forms-latest.js"></script>
     </body>
 </html>

@@ -14,7 +14,7 @@ if ($conn->connect_error) {
 }
 
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
-    $user_input_username = trim($_POST['username'] ?? '');
+    $user_input_username = trim($_POST['email'] ?? '');
     $user_input_password = trim($_POST['password'] ?? '');
 
     if (empty($user_input_username) || empty($user_input_password)) {
