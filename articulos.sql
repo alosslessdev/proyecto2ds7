@@ -23,7 +23,6 @@ CREATE TABLE IF NOT EXISTS articulos (
 CREATE TABLE IF NOT EXISTS usuarios (
     id INT PRIMARY KEY AUTO_INCREMENT, -- Identificador único para cada usuario
     nombre_usuario VARCHAR(100) NOT NULL UNIQUE,
-    email VARCHAR(255) NOT NULL UNIQUE,
     password_hash VARCHAR(255) NOT NULL, -- Almacenar contraseñas hasheadas (nunca en texto plano)
     fecha_registro TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
