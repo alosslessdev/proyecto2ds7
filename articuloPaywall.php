@@ -160,6 +160,36 @@ $conn->close();
                     </h2>
                     <hr class="divider" />
                 <?php endif; ?>
+
+                <?php if ($is_logged_in): // Si el usuario está logueado, mostrar artículos comprados ?>
+                    <div class="mt-5">
+                        <h3>Artículos que has comprado:</h3>
+                        <ul class="list-group">
+                        <?php
+                        // Conexión a la base de datos para obtener artículos comprados
+                        $conn2 = new mysqli($servername, $username, $password, $dbname);
+                        if (!$conn2->connect_error) {
+                            $stmt = $conn2->prepare("SELECT a.id, a.nombre FROM articulos a INNER JOIN articulos_comprados ac ON a.id = ac.articulo_id WHERE ac.usuario_id = ?");
+                            $stmt->bind_param("i", $user_id);
+                            $stmt->execute();
+                            $stmt->bind_result($art_id, $art_nombre);
+                            $has_any = false;
+                            while ($stmt->fetch()) {
+                                $has_any = true;
+                                echo '<li class="list-group-item"><a href="articuloPaywall.php?id=' . $art_id . '">' . htmlspecialchars($art_nombre) . '</a></li>';
+                            }
+                            if (!$has_any) {
+                                echo '<li class="list-group-item">No has comprado ningún artículo aún.</li>';
+                            }
+                            $stmt->close();
+                            $conn2->close();
+                        } else {
+                            echo '<li class="list-group-item">No se pudo obtener la lista de artículos comprados.</li>';
+                        }
+                        ?>
+                        </ul>
+                    </div>
+                <?php endif; ?>
             </div>
         </section>
 
