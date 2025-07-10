@@ -56,9 +56,9 @@
       </button>
       <div class="collapse navbar-collapse" id="navbarResponsive">
         <ul class="navbar-nav ms-auto my-2 my-lg-0">
-          <li class="nav-item"><a class="nav-link" href="#noticiasrelevantes">Noticias</a></li>
-          <li class="nav-item"><a class="nav-link" href="#articulos">Artículos</a></li>
-          <li class="nav-item"><a class="nav-link" href="#juego">Juegos</a></li>
+          <li class="nav-item"><a class="nav-link" href="index.html#noticiasrelevantes">Noticias</a></li>
+          <li class="nav-item"><a class="nav-link" href="index.html#articulos">Artículos</a></li>
+          <li class="nav-item"><a class="nav-link" href="index.html#juego">Juegos</a></li>
           <li class="nav-item"><a class="nav-link" href="login.html">Login</a></li>
           <li class="nav-item"><a class="nav-link" href="carrito.html">Carrito <img src="assets/img/carrito.png" style="width: 20px; height: 20px; margin-left: 5px;" /></a></li>
         </ul>
@@ -73,7 +73,10 @@
       <div id="lista-carrito" class="mb-4"></div>
       <div class="d-flex justify-content-between align-items-center">
         <h4 id="total">Total: $0.00</h4>
-        <button class="btn btn-orange" onclick="pagarTodo()">Pagar Todo</button>
+        <form id="form-pago" method="POST" action="procesar_compra.php">
+          <input type="hidden" name="carrito" id="input-carrito" />
+          <button type="button" class="btn btn-orange" onclick="pagarTodo()">Pagar Todo</button>
+        </form>
       </div>
     </section>
   </main>
@@ -126,10 +129,14 @@
     }
 
     function pagarTodo() {
+      const carrito = JSON.parse(localStorage.getItem('carrito')) || [];
+      if (carrito.length === 0) {
+        alert('No hay productos en el carrito.');
+        return;
+      }
       if (confirm("¿Confirmas el pago de todos los productos?")) {
-        localStorage.removeItem('carrito');
-        alert("✅ ¡Gracias por tu compra!");
-        mostrarCarrito();
+        document.getElementById('input-carrito').value = JSON.stringify(carrito);
+        document.getElementById('form-pago').submit();
       }
     }
 
