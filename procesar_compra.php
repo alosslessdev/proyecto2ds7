@@ -10,13 +10,13 @@ if (!isset($_COOKIE['logged_in']) || !isset($_COOKIE['user_id'])) {
 $user_id = (int)$_COOKIE['user_id'];
 
 if ($_SERVER["REQUEST_METHOD"] !== "POST" || !isset($_POST['carrito'])) {
-    echo '<script>alert("No se recibió el carrito."); window.location="carrito.html";</script>';
+    echo '<script>alert("No se recibió el carrito."); window.location="carrito.php";</script>';
     exit;
 }
 
 $carrito = json_decode($_POST['carrito'], true);
 if (!$carrito || !is_array($carrito)) {
-    echo '<script>alert("Carrito inválido."); window.location="carrito.html";</script>';
+    echo '<script>alert("Carrito inválido."); window.location="carrito.php";</script>';
     exit;
 }
 
@@ -62,7 +62,7 @@ foreach ($carrito as $item) {
 $conn->close();
 
 if (empty($errores)) {
-    echo '<script>alert("¡Compra realizada con éxito!"); localStorage.removeItem(\'carrito\'); window.location="carrito.html";</script>';
+    echo '<script>alert("¡Compra realizada con éxito!"); localStorage.removeItem(\'carrito\'); window.location="carrito.php";</script>';
 } else {
     echo 'Ocurrieron errores:<br>' . implode('<br>', $errores);
 }
