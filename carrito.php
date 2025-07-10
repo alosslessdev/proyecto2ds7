@@ -74,14 +74,16 @@ if (isset($_COOKIE['logged_in']) && isset($_COOKIE['user_id'])) {
         <?php
         $conn2 = new mysqli($servername, $username, $password, $dbname);
         if (!$conn2->connect_error) {
-            $stmt = $conn2->prepare("SELECT a.id, a.nombre FROM articulos a INNER JOIN articulos_comprados ac ON a.id = ac.articulo_id WHERE ac.usuario_id = ?");
+            $stmt = $conn2->prepare("CALL ObtenerArticulosCompradosPorUsuario(?)");
             $stmt->bind_param("i", $user_id);
             $stmt->execute();
-            $stmt->bind_result($art_id, $art_nombre);
+            $result = $stmt->get_result();
             $has_any = false;
-            while ($stmt->fetch()) {
-                $has_any = true;
-                echo '<li class="list-group-item"><a href="articuloPaywall.php?id=' . $art_id . '">' . htmlspecialchars($art_nombre) . '</a></li>';
+            if ($result) {
+                while ($row = $result->fetch_assoc()) {
+                    $has_any = true;
+                    echo '<li class="list-group-item"><a href="articuloPaywall.php?id=' . $row['id'] . '">' . htmlspecialchars($row['nombre']) . '</a></li>';
+                }
             }
             if (!$has_any) {
                 echo '<li class="list-group-item">No has comprado ningún artículo aún.</li>';

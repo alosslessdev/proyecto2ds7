@@ -25,7 +25,6 @@ $has_purchased = false;
 $user_id = null;
 $article_title = "Cargando..."; // Para el título del artículo
 $article_description = "Cargando..."; // Para la descripción del artículo
-$article_image = ""; // Para la imagen del artículo
 $article_content = ""; // Variable para almacenar el contenido a mostrar
 
 // 1. Verificar si el usuario está logueado (usando cookies o sesiones)
@@ -108,7 +107,12 @@ $conn->close();
                     <li class="nav-item"><a class="nav-link" href="index.html#noticiasrelevantes">Noticias</a></li>
                     <li class="nav-item"><a class="nav-link" href="index.html#portfolio">Reviews</a></li>
                     <li class="nav-item"><a class="nav-link" href="index.html#juego">Juegos</a></li>
+                <?php if (!$is_logged_in): ?>
                     <li class="nav-item"><a class="nav-link" href="login.html">Login</a></li>
+                <?php endif; ?>
+                <?php if ($is_logged_in): ?>
+                    <li class="nav-item"><a class="nav-link" href="carrito.php">Carrito</a></li>
+                 <?php endif; ?>
                 </ul>
             </div>
         </div>
@@ -123,7 +127,7 @@ $conn->close();
                     <p class="text-white-75 mb-5"><?php echo htmlspecialchars($article_description); ?></p>
                 </div>
                 <div class="col-lg-6" style="padding-left: 5%;">
-                    <img src="<?php echo htmlspecialchars($article_image); ?>" width="100%" class="img-fluid" alt="Imagen del artículo">
+                    <img src="assets/img/portfolio/thumbnails/MV5BNWNhZDUwZjgtYTg0YS00MzQ2LWFkYzItMzI0ZDEyZWE5MTk2XkEyXkFqcGc@._V1_.jpg" width="100%" class="img-fluid" alt="Imagen del artículo">
                 </div>
             </div>
         </header>
