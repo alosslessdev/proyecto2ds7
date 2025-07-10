@@ -60,11 +60,34 @@ if (isset($_COOKIE['logged_in']) && isset($_COOKIE['user_id'])) {
     <section class="container mt-5">
       <h2 class="mb-4 text-center">🛒 Tu Carrito de Compras</h2>
       <div id="lista-carrito" class="mb-4"></div>
+      <!-- Formulario de pago con tarjeta de crédito (simulación) -->
+      <form id="form-tarjeta" class="mb-4" autocomplete="off" onsubmit="return validarTarjeta();">
+        <div class="row g-3">
+          <div class="col-md-6">
+            <label for="nombre-tarjeta" class="form-label">Nombre del titular</label>
+            <input type="text" class="form-control" id="nombre-tarjeta" required maxlength="50">
+          </div>
+          <div class="col-md-6">
+            <label for="numero-tarjeta" class="form-label">Número de tarjeta</label>
+            <input type="text" class="form-control" id="numero-tarjeta" required maxlength="20">
+          </div>
+          <div class="col-md-4">
+            <label for="expiracion" class="form-label">Expiración (MM/AA)</label>
+            <input type="text" class="form-control" id="expiracion" required maxlength="5" placeholder="MM/AA" pattern="\d{2}/\d{2}">
+          </div>
+          <div class="col-md-4">
+            <label for="cvv" class="form-label">CVV</label>
+            <input type="text" class="form-control" id="cvv" required maxlength="3" pattern="\d{3}" inputmode="numeric">
+          </div>
+        </div>
+        <div id="error-tarjeta" class="text-danger mt-2" style="display:none;"></div>
+        <button type="submit" class="btn btn-success mt-3">Validar Tarjeta</button>
+      </form>
       <div class="d-flex justify-content-between align-items-center">
         <h4 id="total">Total: $0.00</h4>
         <form id="form-pago" method="POST" action="procesar_compra.php">
           <input type="hidden" name="carrito" id="input-carrito" />
-          <button type="button" class="btn btn-orange" onclick="pagarTodo()">Pagar Todo</button>
+          <button type="button" class="btn btn-orange" id="btn-pagar-todo" onclick="pagarTodo()" disabled>Pagar Todo</button>
         </form>
       </div>
       <?php if ($is_logged_in): ?>
@@ -147,6 +170,58 @@ if (isset($_COOKIE['logged_in']) && isset($_COOKIE['user_id'])) {
         document.getElementById('input-carrito').value = JSON.stringify(carrito);
         document.getElementById('form-pago').submit();
       }
+    }
+    // Validación de tarjeta de crédito (simulación)
+    function validarTarjeta() {
+      const nombre = document.getElementById('nombre-tarjeta').value.trim();
+      const numero = document.getElementById('numero-tarjeta').value.trim();
+      const expiracion = document.getElementById('expiracion').value.trim();
+      const cvv = document.getElementById('cvv').value.trim();
+      const errorDiv = document.getElementById('error-tarjeta');
+      errorDiv.style.display = 'none';
+      // Validaciones básicas
+      if (nombre.length < 3) {
+        errorDiv.textContent = 'El nombre del titular es demasiado corto.';
+        errorDiv.style.display = 'block';
+        return false;
+      }
+      if (!/^\d{13,19}$/.test(numero.replace(/\s+/g, ''))) {
+        errorDiv.textContent = 'El número de tarjeta debe tener entre 13 y 19 dígitos (puedes usar espacios).';
+        errorDiv.style.display = 'block';
+        return false;
+      }
+      if (!/^\d{2}\/\d{2}$/.test(expiracion)) {
+        errorDiv.textContent = 'La expiración debe tener el formato MM/AA.';
+        errorDiv.style.display = 'block';
+        return false;
+      }
+      // Validar mes y año
+      const [mes, anio] = expiracion.split('/').map(Number);
+      if (mes < 1 || mes > 12) {
+        errorDiv.textContent = 'El mes de expiración no es válido.';
+        errorDiv.style.display = 'block';
+        return false;
+      }
+      // Validar que la fecha no sea pasada
+      const hoy = new Date();
+      const fechaExp = new Date(2000 + anio, mes - 1);
+      if (fechaExp < new Date(hoy.getFullYear(), hoy.getMonth())) {
+        errorDiv.textContent = 'La tarjeta está expirada.';
+        errorDiv.style.display = 'block';
+        return false;
+      }
+      if (!/^\d{3}$/.test(cvv)) {
+        errorDiv.textContent = 'El CVV debe tener 3 dígitos.';
+        errorDiv.style.display = 'block';
+        return false;
+      }
+      // Si todo es válido, habilitar el botón de pago
+      document.getElementById('btn-pagar-todo').disabled = false;
+      errorDiv.textContent = '¡Tarjeta válida! Puedes proceder al pago.';
+      errorDiv.classList.remove('text-danger');
+      errorDiv.classList.add('text-success');
+      errorDiv.style.display = 'block';
+      return false; // No envía el form, solo valida
     }
     mostrarCarrito();
   </script>
