@@ -33,7 +33,7 @@ if ($_SERVER["REQUEST_METHOD"] === 'POST') {
             setcookie("logged_in", "true", time() + (86400 * 30), "/");
             setcookie("user_id", $user_id, time() + (86400 * 30), "/");
 
-            header("Location: articulo.php");
+            header("Location: articuloPaywall.php");
             exit;
         } else {
             header("Location: login.html?error=login");

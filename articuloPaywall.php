@@ -32,7 +32,7 @@ $article_content = ""; // Variable para almacenar el contenido a mostrar
 // Es más seguro usar sesiones para manejar el estado de login. Si aún no las usas:
 session_start(); // Inicia la sesión al principio de tu script
 
-if (isset($_COOKIE['logged_in']) && $_COOKIE['logged_in'] === true && isset($_COOKIE['user_id'])) {
+if (isset($_COOKIE['logged_in']) && isset($_COOKIE['user_id'])) {
     $is_logged_in = true;
     $user_id = (int)$_COOKIE['user_id'];
 }
@@ -57,25 +57,23 @@ if ($is_logged_in) {
 }
 
 // 3. Obtener los detalles del artículo de la base de datos
-$stmt_get_article = $conn->prepare("SELECT titulo, descripcion, imagen, contenido_gratis, contenido_premium FROM articulos WHERE id = ?");
+$stmt_get_article = $conn->prepare("SELECT nombre, precio, contenido FROM articulos WHERE id = ?");
 $stmt_get_article->bind_param("i", $current_article_id);
 $stmt_get_article->execute();
-$stmt_get_article->bind_result($db_title, $db_description, $db_image, $contenido_gratis, $contenido_premium);
+$stmt_get_article->bind_result($db_nombre, $db_precio, $db_contenido);
 $stmt_get_article->fetch();
 $stmt_get_article->close();
 
-$article_title = $db_title;
-$article_description = $db_description;
-$article_image = $db_image;
+$article_title = $db_nombre;
+$article_description = 'Precio: $' . number_format($db_precio, 2);
+$article_image = ''; // No hay campo imagen en la tabla
 
 // Decidir qué contenido mostrar
-if ($has_purchased || !$is_logged_in) { // Mostrar contenido gratis si no ha comprado o no está logueado
-    $article_content = $contenido_gratis;
-} 
-if ($has_purchased && $is_logged_in) { // Mostrar premium si ha comprado Y está logueado
-    $article_content = $contenido_premium;
+if ($has_purchased) { // Mostrar contenido si ha comprado
+    $article_content = $db_contenido;
+} else {
+    $article_content = 'Este artículo es premium. Debes comprarlo para ver el contenido.';
 }
-
 
 $conn->close();
 ?>
